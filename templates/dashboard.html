@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body class="dashboard-page">
+
+<div class="dashboard">
+
+    <!--  SIDEBAR -->
+    <div class="sidebar">
+        <h2 style="font-size: 30px; color: rgb(235, 190, 220); font-weight: bolder;">Dashboard</h2>
+        <a href="#">Add Expense</a>
+        <a href="#">View Expenses</a>
+        <a href="#">Charts</a>
+        <a href="#">Budget</a>
+        <a href="#">Insights</a>
+        <a href="/logout">Logout</a>
+        <h3 style="font-size: 15px; color: #ffffff; font-weight: bolder;">Need help? Ask the AI assistant🤖</h3>
+
+        <!-- AI ASSISTANT -->
+<div class="ai-widget">
+
+    <input type="checkbox" id="ai-toggle" hidden>
+
+    <!-- BUTTON -->
+    <label for="ai-toggle" class="ai-btn">🤖</label>
+
+    <!-- CHAT BOX -->
+    <div class="ai-box">
+
+        <h4 style="color: aliceblue;">AI Assistant</h4>
+
+        <!-- HELP -->
+        <div class="ai-help">
+            <p style="color: rgb(108, 1, 44); font-size: 15px; font-weight: bolder;">Try asking:</p> 
+            <ul style="color: black; font-size: 13px;">
+                <li>Total spending</li>
+                <li>Food expenses</li>
+                <li>This month spending</li>
+                <li>Trend</li>
+                <li>Suggestion</li>
+            </ul>
+        </div>
+
+        <!-- CHAT -->
+        <div id="chat-box"></div>
+
+        <!-- INPUT -->
+        <div class="input-area">
+            <input type="text" id="msg" placeholder="Ask something...">
+            <button onclick="sendMsg()">➤</button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+let lastMsg = "";
+
+function sendMsg() {
+    let msg = document.getElementById("msg").value;
+
+    if (!msg) return;
+
+    lastMsg = msg;
+
+    let box = document.getElementById("chat-box");
+
+    // hide help after first message
+    let help = document.querySelector(".ai-help");
+    if (help) help.style.display = "none";
+
+    // user message
+    box.innerHTML += `<div class="user-msg">${msg}</div>`;
+
+    fetch("/ai-chat", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "message=" + encodeURIComponent(msg)
+    })
+    .then(res => res.text())
+    .then(data => {
+        box.innerHTML += `
+            <div class="bot-msg">
+                ${data.replace(/\n/g, "<br>")}
+                <br>
+                <button class="retry-btn" onclick="retryMsg()">Try Again</button>
+            </div>
+        `;
+        box.scrollTop = box.scrollHeight;
+    });
+
+    document.getElementById("msg").value = "";
+}
+
+function retryMsg() {
+    document.getElementById("msg").value = lastMsg;
+    sendMsg();
+}
+</script>
+   
+    </div>
+
+    <!--  MAIN -->
+    <div class="main-content">
+
+        <!-- TOP -->
+        <div class="topbar">
+            <h3 style="font-family:cursive; color: rgb(251, 250, 251);font-size: 25px;">Hello {{username}},</h3>
+        </div>
+
+        <div class="container">
+
+            <!--  ADD EXPENSE -->
+            <div class="card">
+                <h3>Add Expense</h3>
+                <form method="POST">
+                    <input type="number" name="amount" placeholder="Amount" required>
+
+                    <select name="category">
+                        <option>Food</option>
+                        <option>Travel</option>
+                        <option>Shopping</option>
+                        <option>Bills</option>
+                    </select>
+
+                    <input type="date" name="date" required>
+
+                    <button class="btn">Add</button>
+                </form>
+            </div>
+
+            <!--  FILTER -->
+           <div class="card">
+
+    <h3>Expenses</h3>
+
+    <!--  FILTER INPUTS -->
+    <form method="GET">
+
+        <div class="form-row">
+            <input type="number" name="month" placeholder="Month (1-12)">
+
+            <select name="category">
+                <option value="">All Categories</option>
+                <option>Food</option>
+                <option>Travel</option>
+                <option>Shopping</option>
+                <option>Bills</option>
+            </select>
+        </div>
+
+        <!--  SINGLE BUTTON -->
+        <button class="btn">Show/ Hide Expenses</button>
+    </form>
+
+    <!--  RESULTS -->
+    {% if expenses %}
+    <div class="expense-list">
+
+        {% for exp in expenses %}
+        <div class="expense-item">
+            <div>
+                <span class="amount">₹{{ exp[1] }}</span>
+                <span class="category">{{ exp[2] }}</span>
+            </div>
+            <div class="date">{{ exp[3] }}</div>
+            <form action="/delete-expense/{{ exp[0] }}" method="POST">
+        <button class="btn" style="background:red; margin-top:1px; height: 30px;"
+            onclick="return confirm('Delete this expense?')">
+            Delete
+        </button>
+    </form>
+
+        </div>
+        {% endfor %}
+
+        <div class="total-box">
+            Total: ₹{{ total }}
+        </div>
+
+    </div>
+    {% endif %}
+
+</div>
+
+
+            <!--  TOGGLE WITHOUT JS -->
+           <div class="card">
+
+    <h3>All Expenses</h3>
+
+    <!--  TOGGLE BUTTON -->
+    <input type="checkbox" id="toggle-expense" hidden>
+
+    <label for="toggle-expense" class="btn">
+        Show / Hide Expenses
+    </label>
+
+    <!--  EXPENSES -->
+    <div class="expense-section">
+
+        {% if all_expenses %}
+            {% for exp in all_expenses %}
+            <div class="expense-item">
+                <div>
+                    <span class="amount">₹{{ exp[1] }}</span>
+                    <span class="category">{{ exp[2] }}</span>
+                </div>
+                <div class="date">{{ exp[3] }}</div>
+                <form action="/delete-expense/{{ exp[0] }}" method="POST">
+        <button class="btn" style="background:red; margin-top:5px;"
+            onclick="return confirm('Delete this expense?')">
+            Delete
+        </button>
+    </form>
+            </div>
+            {% endfor %}
+
+            <div class="total-box">
+                Total: ₹{{ all_total }}
+            </div>
+
+        {% else %}
+            <p>No expenses found</p>
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+
+
+            <!--  CHARTS -->
+          <div class="card">
+    <h3>Charts</h3>
+
+    <!--  INPUT + BUTTON -->
+    <input type="number" id="chartMonth" placeholder="Enter month (1-12)">
+    <button id="chartBtn" class="btn" onclick="handleChart()">Show Charts</button>
+    <p id="chartError" style="color:red; display:none;">Please enter a valid month</p>
+
+    <!--  CHART BOX -->
+    <div id="chartBox" style="display:none; margin-top:10px;">
+        
+        {% if pie_chart %}
+            <img src="{{ url_for('static', filename=pie_chart.split('/')[-1]) }}">
+            <img src="{{ url_for('static', filename=line_chart.split('/')[-1]) }}">
+        
+        {% elif request.args.get("chart_month") %}
+            <p>No data available</p>
+        {% endif %}
+
+    </div>
+</div>
+        
+            <!--  SET BUDGET -->
+            <div class="card">
+                <h3>Set Budget</h3>
+
+                <form method="POST" action="/set-budget">
+                    <input type="number" name="budget" placeholder="Enter budget" required>
+                    <button class="btn">Set</button>
+                </form>
+
+                <p>Current Budget: ₹{{ budget }}</p>
+            </div>
+
+            <!--  INSIGHTS -->
+            <div class="card">
+                <h3>Insights</h3>
+
+                <p>Highest Spending: {{ insights.top_category }}</p>
+                <p>Avg Daily Spend: ₹{{ insights.avg_daily }}</p>
+            </div>
+
+            <!-- TREND -->
+            <div class="card">
+                <h3>Spending Trend</h3>
+                <p>Current Month: ₹{{ trend.current }}</p>
+                <p>Previous Month: ₹{{ trend.previous }}</p>
+                <p>{{ trend.message }}</p>
+                <p>{{ trend.suggestion }}</p>
+            </div>
+
+            <!--  REPORT -->
+            <div class="card">
+                <form method="GET">
+                    <input type="number" name="report_month" placeholder="Enter month">
+                    <button class="btn">Generate Report</button>
+                </form>
+
+                {% if report %}
+                    <p>Total: ₹{{ report.total }}</p>
+                    <p>Avg Daily: ₹{{ report.avg }}</p>
+
+                    {% for row in report.categories %}
+                        <p>{{ row[0] }}: ₹{{ row[1] }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <!--  EXPORT -->
+            <div class="card">
+                <h3>Export</h3>
+
+                <a href="/export-csv" class="btn" style="height: 35px;">CSV All </a>
+                <a href="/export-excel" class="btn" style="height: 35px;">Excel All</a>
+
+                <form method="GET">
+                    <input type="number" name="month" placeholder="Month" style="margin-top: 10px;">
+                    <button formaction="/export-csv" class="btn">CSV Month</button>
+                    <button formaction="/export-excel" class="btn">Excel Month</button>
+                </form>
+            </div>
+
+            
+
+
+
+
+        </div>
+    </div>
+</div>
+
+<script>
+let currentMonth = null;
+
+function handleChart() {
+    let month = document.getElementById("chartMonth").value;
+    let error = document.getElementById("chartError");
+    let box = document.getElementById("chartBox");
+    let btn = document.getElementById("chartBtn")
+
+    // ❌ no month
+    if (!month) {
+        error.style.display = "block";
+        return;
+    } else {
+        error.style.display = "none";
+    }
+
+    // 🔥 IF NEW MONTH → reload
+    if (currentMonth !== month) {
+        window.location.href = "/dashboard?chart_month=" + month;
+        return;
+    }
+
+    // 🔥 TOGGLE ONLY
+    if (box.style.display === "none") {
+        box.style.display = "block";
+        btn.innerText = "Hide Charts";
+    } else {
+        box.style.display = "none";
+        btn.innerText = "Show Charts";
+    }
+}
+</script>
+<script>
+window.onload = function() {
+    let params = new URLSearchParams(window.location.search);
+    let month = params.get("chart_month");
+    let box = document.getElementById("chartBox");
+    let btn = document.getElementById("chartBtn");
+
+    if (month) {
+        currentMonth = month;
+
+        document.getElementById("chartMonth").value = month;
+        box.style.display = "block";
+
+        btn.innerText = "Hide Charts";
+    } else {
+        btn.innerText = "Show Charts";
+    
+    }
+}
+</script>
+
+</body>
+</html>

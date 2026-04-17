@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Expense Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Pacifico&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="logo">Expense Tracker</div>
+
+        <div class="nav-links">
+            <a href="/" class="active"><i class="fa-solid fa-house"></i> Home</a>
+            <a href="/login"><i class="fa-solid fa-user"></i> Login</a>
+            <a href="/register"><i class="fa-solid fa-user-plus"></i> Sign-up</a>
+        </div>
+    </nav>
+
+    <!-- MAIN -->
+    <div class="main">
+
+        <!-- LEFT -->
+        <div class="left">
+            <h1>Welcome to <br> Expense Tracker</h1>
+            <p class="tagline">Track your cents to protect your sense.</p>
+
+            <div class="info-box">
+                <h3>WE HELP YOU TO</h3>
+                <ul>
+                    <li>Track Smarter: know exactly where your money goes.</li>
+                    <li>Simple Habits: Turn daily spending into financial freedom.</li>
+                    <li>Clear Insights: Data driven decisions for your future.</li>
+                    <li>Total Control: No more stress, just pure clarity.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="right">
+            <h2>Get started</h2>
+
+            <a href="/register" class="action-card">
+                <i class="fa-solid fa-user-plus"></i> Create an Account
+            </a>
+
+            <a href="/login" class="action-card">
+                <i class="fa-solid fa-right-to-bracket"></i> Login your Account
+            </a>
+
+            <a href="#" class="action-card">
+                <i class="fa-solid fa-chart-line"></i> Track Now
+            </a>
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        © 2024 Expense Tracker | Contact: renelta@email.com
+    </footer>
+
+
+
+</body>
+</html>

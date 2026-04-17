@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Charts</title>
+</head>
+<body>
+
+<h2>Expense Chart</h2>
+
+{% if chart %}
+    <img src="{{ url_for('static', filename=chart.split('/')[-1]) }}" width="500">
+{% else %}
+    <p>No data available</p>
+{% endif %}
+
+<br><br>
+<a href="/view-expense">Back</a>
+
+</body>
+</html>
